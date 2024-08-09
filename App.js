@@ -16,6 +16,7 @@ import MailScreen from "./src/views/screens/MailScreen";
 import AddSchedule from "./src/views/screens/AddSchedule";
 import ProfileScreen from "./src/views/screens/ProfileScreen"; // Import ProfileScreen
 
+
 import { ScheduleProvider } from './src/context/ScheduleContext';
 
 const Stack = createNativeStackNavigator();
