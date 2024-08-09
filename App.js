@@ -17,7 +17,7 @@ import AddSchedule from "./src/views/screens/AddSchedule";
 import ProfileScreen from "./src/views/screens/ProfileScreen"; // Import ProfileScreen
 
 
-import { ScheduleProvider } from './src/context/ScheduleContext';
+import { ScheduleProvider } from './src/views/context/ScheduleContext';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
