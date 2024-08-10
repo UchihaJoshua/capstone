@@ -12,7 +12,8 @@ export const ScheduleProvider = ({ children }) => {
     const loadSchedule = async () => {
       try {
         const savedSchedule = await AsyncStorage.getItem('schedule');
-        console.log('Loaded schedule:', savedSchedule); // Debug log
+        // Removed console log
+        // console.log('Loaded schedule:', savedSchedule); 
         if (savedSchedule) {
           setSchedule(JSON.parse(savedSchedule));
         } else {
@@ -34,7 +35,8 @@ export const ScheduleProvider = ({ children }) => {
   useEffect(() => {
     const saveSchedule = async () => {
       try {
-        console.log('Saving schedule:', schedule); // Debug log
+        // Removed console log
+        // console.log('Saving schedule:', schedule); 
         await AsyncStorage.setItem('schedule', JSON.stringify(schedule));
       } catch (error) {
         console.error('Failed to save schedule:', error);

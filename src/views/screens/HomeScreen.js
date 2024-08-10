@@ -15,8 +15,9 @@ const HomeScreen = ({ navigation }) => {
     if (userData) {
       const parsedData = JSON.parse(userData);
       if (parsedData.loggedIn) {
-        console.log("Home Screen");
-        console.log(parsedData);
+        // Removed console logs
+        // console.log("Home Screen");
+        // console.log(parsedData);
       }
       setUserDetails(parsedData);
     }
