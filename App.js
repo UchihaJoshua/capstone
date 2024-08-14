@@ -15,7 +15,8 @@ import UnlockScreen from "./src/views/screens/UnlockScreen";
 import MailScreen from "./src/views/screens/MailScreen";
 import AddSchedule from "./src/views/screens/AddSchedule";
 import ProfileScreen from "./src/views/screens/ProfileScreen"; // Import ProfileScreen
-
+import LoginScreenInstructor from "./src/views/screens/LoginScreenInstructor";
+import HomeScreenStudent from "./src/views/screens/HomeScreenStudent";
 
 import { ScheduleProvider } from './src/views/context/ScheduleContext';
 
@@ -196,7 +197,7 @@ function App() {
   return (
     <ScheduleProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="HomeScreen" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="HomeScreenStudent" screenOptions={{ headerShown: false }}>
           <Stack.Screen
             name="DrawerNavigator"
             component={DrawerNavigator}
@@ -226,6 +227,17 @@ function App() {
             component={ProfileScreen}
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name="LoginScreenInstructor"
+            component={LoginScreenInstructor}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="HomeScreenStudent"
+            component={HomeScreenStudent}
+            options={{ headerShown: false }}
+          />
+          
         </Stack.Navigator>
       </NavigationContainer>
     </ScheduleProvider>

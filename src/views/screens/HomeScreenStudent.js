@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Image } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreenStudent = ({ navigation }) => {
   const [userDetails, setUserDetails] = React.useState(null); // Initialize as null
   const [selectedButton, setSelectedButton] = React.useState('Overview'); // Default to 'Overview'
 
@@ -40,11 +40,6 @@ const HomeScreen = ({ navigation }) => {
               <Text style={styles.mainText}>Mac Laboratory</Text>
               <Text style={styles.subText}>COLLEGE OF COMPUTER STUDIES</Text>
             </View>
-            <View style={styles.boxContainer}>
-              <View style={styles.box}>
-                <Text style={styles.boxText}>Centered Box</Text>
-              </View>
-            </View>
           </View>
         );
       case 'People':
@@ -58,7 +53,7 @@ const HomeScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.welcomeText}>Welcome, </Text>
-        <Text style={styles.nameText}>{userDetails?.username || 'User'}</Text>
+        <Text style={styles.nameText}>{userDetails?.username || 'Student'}</Text>
       </View>
       <View style={styles.navbar}>
         <TouchableOpacity
@@ -139,24 +134,18 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   overviewContainer: {
-    position: 'relative', // Enable absolute positioning of child elements
     flex: 1,
-    alignItems: 'flex-start', // Align content to the start
-    justifyContent: 'center', // Center content vertically if needed
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   image: {
-    position: 'absolute',
-    left: -110, // Align to the left
-    top: -20, // Align to the top
     width: 280, // Set a small width for the logo
     height: 65, // Set a small height for the logo
     resizeMode: 'contain', // Ensure the image scales to fit within the dimensions
   },
   textContainer: {
-    position: 'absolute',
-    left: 50, // Align text to the right of the image
-    top: -15, // Adjust top position as needed
-    paddingLeft: 20, // Space between image and text
+    marginTop: 10,
+    alignItems: 'center',
   },
   mainText: {
     fontSize: 20,
@@ -170,22 +159,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Roboto',
   },
-  boxContainer: {
-    marginTop: -250, // Reduced margin to move the box up
-    alignItems: 'center', // Center the box horizontally
-    width: '100%', // Ensure the box takes the full width available
-  },
-  box: {
-    backgroundColor: '#e0e0e0', // Background color of the box
-    padding: 60,
-    borderRadius: 10,
-    width: '95%', // Width of the box
-    alignItems: 'center', // Center content inside the box
-  },
-  boxText: {
-    fontSize: 18,
-    color: '#333',
-  },
 });
 
-export default HomeScreen;
+export default HomeScreenStudent;

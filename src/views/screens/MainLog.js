@@ -18,7 +18,7 @@ const MainLog = ({ navigation }) => {
         <Text style={styles.textTitle}>LOGIN AS</Text>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("InstructorLoginScreen")}
+          onPress={() => navigation.navigate("LoginScreenInstructor")}
         >
           <Text style={styles.buttonText}>Instructor</Text>
         </TouchableOpacity>
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "black",
+    backgroundColor: "#F0F0F0", // Light background color
     paddingHorizontal: 10,
   },
   
@@ -49,11 +49,11 @@ const styles = StyleSheet.create({
     fontSize: 25,
     textAlign: "center",
     fontWeight: "bold",
-    color: "white",
+    color: "#333", // Darker text for contrast
     marginBottom: 20,
   },
   button: {
-    backgroundColor: "white",
+    backgroundColor: "#00796B", // A modern light teal color
     paddingVertical: 15,
     borderRadius: 5,
     marginBottom: 20,
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "black",
+    color: "white",
   },
   image: {
     width: 255,
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 16,
-    color: "white",
+    color: "#333", // Darker text for readability
     textAlign: "center",
     marginTop: 40,
   },
