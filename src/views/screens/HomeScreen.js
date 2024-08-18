@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#6200ea',
+    color: '#333',
   },
   subjectContainer: {
     marginBottom: 20,
