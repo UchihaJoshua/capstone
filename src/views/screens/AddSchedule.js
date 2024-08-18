@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, ScrollView } from 'react-native';
 import axios from 'axios';
-import { ScheduleContext } from '../context/ScheduleContext';
+
 
 const AddSchedule = () => {
   const [subjects, setSubjects] = useState([]);

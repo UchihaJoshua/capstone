@@ -20,7 +20,7 @@ import HomeScreenStudent from "./src/views/screensStudent/HomeScreenStudent";
 import QrScanner from "./src/views/screensStudent/qrscanner";
 import MailScreenStudent from "./src/views/screensStudent/MailScreenStudent";
 
-import { ScheduleProvider } from './src/views/context/ScheduleContext';
+
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -281,7 +281,7 @@ function DrawerNavigatorStudent() {
 
 function App() {
   return (
-    <ScheduleProvider>
+    
       <NavigationContainer>
         <Stack.Navigator initialRouteName="MainLog" screenOptions={{ headerShown: false }}>
           <Stack.Screen
@@ -327,7 +327,7 @@ function App() {
           
         </Stack.Navigator>
       </NavigationContainer>
-    </ScheduleProvider>
+    
   );
 }
 
