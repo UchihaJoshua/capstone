@@ -65,71 +65,59 @@ const LoginScreen = ({ navigation }) => {
     console.log(inputs);
 
     setLoading(true);
-    setTimeout(async () => {
-      try {
-        let userData = await AsyncStorage.getItem("userData");
-        console.log("Retrieved User Data:", userData);
 
-        if (userData) {
-          userData = JSON.parse(userData);
-          console.log("Parsed User Data:", userData);
+    try {
+      // Retrieve user data from AsyncStorage
+      let userData = await AsyncStorage.getItem("userData");
+      console.log("Retrieved User Data:", userData);
 
-          // Check if user is already logged in
-          if (userData.loggedIn) {
-            Dialog.show({
-              type: ALERT_TYPE.INFO,
-              title: "INFO",
-              textBody: "You are already logged in!",
-              button: "Close",
-            });
-            setLoading(false);
-            return;
-          }
+      if (userData) {
+        userData = JSON.parse(userData);
+        console.log("Parsed User Data:", userData);
 
-          // Validate login credentials
-          if (
-            inputs.email === userData.email &&
-            inputs.password === userData.password
-          ) {
-            // Successful login
-            await AsyncStorage.setItem(
-              "userData",
-              JSON.stringify({ ...userData, loggedIn: true })
-            );
-            navigation.navigate("DrawerNavigator", {
-              screen: "HomeTabs",
-              params: { screen: "Home" },
-            });
-          } else {
-            // Incorrect credentials
-            Dialog.show({
-              type: ALERT_TYPE.DANGER,
-              title: "ERROR",
-              textBody: "Incorrect Username/Password!",
-              button: "Close",
-            });
-          }
+        // Validate login credentials
+        if (
+          inputs.email === userData.email &&
+          inputs.password === userData.password
+        ) {
+          // Successful login
+          await AsyncStorage.setItem(
+            "userData",
+            JSON.stringify({ ...userData, loggedIn: true })
+          );
+          navigation.navigate("DrawerNavigatorStudent", {
+            screen: "HomeTabs",
+            params: { screen: "Home" },
+          });
         } else {
-          // No user data found
+          // Incorrect credentials
           Dialog.show({
             type: ALERT_TYPE.DANGER,
             title: "ERROR",
-            textBody: "No Account Found!",
+            textBody: "Incorrect Username/Password!",
             button: "Close",
           });
         }
-      } catch (error) {
-        // Error handling
+      } else {
+        // No user data found
         Dialog.show({
           type: ALERT_TYPE.DANGER,
           title: "ERROR",
-          textBody: error.message || error,
+          textBody: "No Account Found!",
           button: "Close",
         });
-      } finally {
-        setLoading(false); // Ensure loading is stopped
       }
-    }, 3000);
+    } catch (error) {
+      // Error handling
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: "ERROR",
+        textBody: error.message || error,
+        button: "Close",
+      });
+    } finally {
+      setLoading(false); // Ensure loading is stopped
+    }
   };
 
   return (

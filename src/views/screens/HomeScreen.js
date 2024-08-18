@@ -1,25 +1,29 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Image } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useState, useEffect } from 'react';
+import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = ({ navigation }) => {
-  const [userDetails, setUserDetails] = React.useState(null); // Initialize as null
-  const [selectedButton, setSelectedButton] = React.useState('Overview'); // Default to 'Overview'
+  const [userDetails, setUserDetails] = useState(null);
+  const [selectedButton, setSelectedButton] = useState('Overview');
+  const [subjects, setSubjects] = useState([]);
+  const [matchedSubjects, setMatchedSubjects] = useState([]);
+  const [instructors, setInstructors] = useState([]);
+  const [subjectInstructorMap, setSubjectInstructorMap] = useState({});
+  const [instructorSubjectMap, setInstructorSubjectMap] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getUserData();
+    fetchData();
   }, []);
 
   const getUserData = async () => {
     try {
       const userData = await AsyncStorage.getItem("userData");
-
       if (userData) {
         const parsedData = JSON.parse(userData);
-        if (parsedData.loggedIn) {
-          console.log("Home Screen");
-          console.log(parsedData);
-        }
         setUserDetails(parsedData);
       }
     } catch (error) {
@@ -27,13 +31,74 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  const fetchData = async () => {
+    try {
+      const subjectsResponse = await axios.get('http://192.168.101.13:8000/api/subs');
+      const fetchedSubjects = subjectsResponse.data.data;
+      setSubjects(fetchedSubjects);
+
+      const subjectIdResponse = await axios.get('http://192.168.101.13:8000/api/linkedSubjects');
+      const subjectIds = subjectIdResponse.data.data.map(item => item.subject_id);
+
+      const instructorsResponse = await axios.get('http://192.168.101.13:8000/api/instructors');
+      const fetchedInstructors = instructorsResponse.data.data;
+      setInstructors(fetchedInstructors);
+
+      const instructorSubjectResponse = await axios.get('http://192.168.101.13:8000/api/linkedSubjects');
+      const instructorSubjects = instructorSubjectResponse.data.data;
+
+      const subjectInstructorMap = {};
+      const instructorSubjectMap = {};
+
+      instructorSubjects.forEach(instructorSubject => {
+        const subject = fetchedSubjects.find(sub => sub.id === instructorSubject.subject_id);
+        const instructor = fetchedInstructors.find(inst => inst.id === instructorSubject.user_id);
+        if (subject && instructor) {
+          if (!subjectInstructorMap[subject.id]) {
+            subjectInstructorMap[subject.id] = {
+              ...subject,
+              instructorName: instructor.username
+            };
+          }
+          if (!instructorSubjectMap[instructor.id]) {
+            instructorSubjectMap[instructor.id] = [];
+          }
+          instructorSubjectMap[instructor.id].push(subject);
+        }
+      });
+
+      setSubjectInstructorMap(subjectInstructorMap);
+
+      const filteredSubjects = fetchedSubjects.filter(subject => subjectIds.includes(subject.id));
+      setMatchedSubjects(filteredSubjects);
+      setInstructorSubjectMap(instructorSubjectMap);
+      setLoading(false);
+    } catch (error) {
+      setError(error);
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#6200ea" style={styles.loader} />;
+  }
+
+  if (error) {
+    return <Text style={styles.error}>Error: {error.message}</Text>;
+  }
+
+  const groupedSubjects = Object.keys(instructorSubjectMap).map(instructorId => ({
+    instructorName: instructors.find(inst => inst.id === parseInt(instructorId)).username,
+    subjects: instructorSubjectMap[instructorId]
+  }));
+
   const renderContent = () => {
     switch (selectedButton) {
       case 'Overview':
         return (
-          <View style={styles.overviewContainer}>
+          <ScrollView style={styles.scrollableContainer}>
             <Image
-              source={require('../imglogo/ccslogo.png')} // Replace with the path to your local image
+              source={require('../imglogo/ccslogo.png')}
               style={styles.image}
             />
             <View style={styles.textContainer}>
@@ -44,8 +109,27 @@ const HomeScreen = ({ navigation }) => {
               <View style={styles.box}>
                 <Text style={styles.boxText}>Centered Box</Text>
               </View>
+              {groupedSubjects.map(group => (
+                <View key={group.instructorName} style={styles.group}>
+                  <Text style={styles.instructorHeader}>{group.instructorName}</Text>
+                  {group.subjects.map(subject => (
+                    <View key={subject.id} style={styles.subjectContainer}>
+                      <Text style={styles.subjectTitle}>{subject.name}</Text>
+                      <Text style={styles.subjectCode}>Code: {subject.code}</Text>
+                      <Text style={styles.subjectTime}>Time: {formatTime(subject.start_time)} - {formatTime(subject.end_time)}</Text>
+                      <Text style={styles.subjectSection}>Section: {subject.section}</Text>
+                      <Text style={styles.subjectDescription}>
+                        {subject.description}
+                        <TouchableOpacity>
+                          <Text style={styles.readMore}> Read more →</Text>
+                        </TouchableOpacity>
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ))}
             </View>
-          </View>
+          </ScrollView>
         );
       case 'People':
         return <Text style={styles.contentText}>People Screen Content</Text>;
@@ -54,8 +138,15 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  const formatTime = (time) => {
+    const [hours, minutes] = time.split(':');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12;
+    return `${formattedHours}:${minutes} ${ampm}`;
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.welcomeText}>Welcome, </Text>
         <Text style={styles.nameText}>{userDetails?.username || 'User'}</Text>
@@ -77,7 +168,7 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.contentContainer}>
         {renderContent()}
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -101,12 +192,11 @@ const styles = StyleSheet.create({
   },
   navbar: {
     flexDirection: 'row',
-    justifyContent: 'flex-start', // Align buttons to the left
     marginBottom: 20,
   },
   navButton: {
-    backgroundColor: '#e0e0e0', // Default button color
-    height: 35, // Set fixed height for buttons
+    backgroundColor: '#e0e0e0',
+    height: 35,
     paddingHorizontal: 15,
     borderRadius: 20,
     elevation: 5,
@@ -115,12 +205,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     alignItems: 'center',
-    justifyContent: 'center', // Center text vertically
-    marginRight: 10, // Space between buttons
-    minWidth: 100, // Minimum width of button
+    justifyContent: 'center',
+    marginRight: 10,
+    minWidth: 100,
   },
   selectedButton: {
-    backgroundColor: '#6200ea', // Color when selected
+    backgroundColor: '#6200ea',
   },
   navButtonText: {
     color: '#333',
@@ -128,63 +218,113 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   selectedButtonText: {
-    color: '#fff', // Text color when button is selected
+    color: '#fff',
   },
   contentContainer: {
     flex: 1,
-    marginTop: 20,
   },
-  contentText: {
-    fontSize: 18,
-    color: "#333",
-  },
-  overviewContainer: {
-    position: 'relative', // Enable absolute positioning of child elements
+  scrollableContainer: {
     flex: 1,
-    alignItems: 'flex-start', // Align content to the start
-    justifyContent: 'center', // Center content vertically if needed
   },
   image: {
     position: 'absolute',
-    left: -110, // Align to the left
-    top: -20, // Align to the top
-    width: 280, // Set a small width for the logo
-    height: 65, // Set a small height for the logo
-    resizeMode: 'contain', // Ensure the image scales to fit within the dimensions
+    left: -110,
+    top: 0,
+    width: 280,
+    height: 65,
+    resizeMode: 'contain',
   },
   textContainer: {
-    position: 'absolute',
-    left: 50, // Align text to the right of the image
-    top: -15, // Adjust top position as needed
-    paddingLeft: 20, // Space between image and text
+    paddingTop: 2,
+    paddingBottom: 15,
+    alignItems: 'center',
   },
   mainText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  subText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  boxContainer: {
+    marginHorizontal: 10,
+    paddingVertical: 10,
+  },
+  box: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  boxText: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-    fontFamily: 'Roboto',
   },
-  subText: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    fontFamily: 'Roboto',
+  group: {
+    marginBottom: 20,
   },
-  boxContainer: {
-    marginTop: -250, // Reduced margin to move the box up
-    alignItems: 'center', // Center the box horizontally
-    width: '100%', // Ensure the box takes the full width available
+  instructorHeader: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#6200ea',
   },
-  box: {
-    backgroundColor: '#e0e0e0', // Background color of the box
-    padding: 60,
-    borderRadius: 10,
-    width: '95%', // Width of the box
-    alignItems: 'center', // Center content inside the box
+  subjectContainer: {
+    marginBottom: 20,
+    padding: 15,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
-  boxText: {
+  subjectTitle: {
     fontSize: 18,
+    fontWeight: 'bold',
     color: '#333',
+  },
+  subjectCode: {
+    fontSize: 14,
+    color: '#555',
+  },
+  subjectTime: {
+    fontSize: 14,
+    color: '#555',
+  },
+  subjectSection: {
+    fontSize: 14,
+    color: '#555',
+  },
+  subjectDescription: {
+    fontSize: 14,
+    color: '#555',
+  },
+  readMore: {
+    color: '#6200ea',
+    fontWeight: 'bold',
+  },
+  contentText: {
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  error: {
+    color: 'red',
+    fontSize: 18,
   },
 });
 

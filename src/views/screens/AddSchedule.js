@@ -10,7 +10,7 @@ const AddSchedule = () => {
   const { addSchedule } = useContext(ScheduleContext);
 
   useEffect(() => {
-    axios.get('http://192.168.101.2:8000/api/subs')
+    axios.get('http://192.168.101.13:8000/api/subs')
       .then(response => {
         if (response.data && Array.isArray(response.data.data)) {
           setSubjects(response.data.data);

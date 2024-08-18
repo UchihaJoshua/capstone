@@ -14,9 +14,11 @@ import MainLog from "./src/views/screens/MainLog";
 import UnlockScreen from "./src/views/screens/UnlockScreen";
 import MailScreen from "./src/views/screens/MailScreen";
 import AddSchedule from "./src/views/screens/AddSchedule";
-import ProfileScreen from "./src/views/screens/ProfileScreen"; // Import ProfileScreen
+import ProfileScreen from "./src/views/screens/ProfileScreen";
 import LoginScreenInstructor from "./src/views/screens/LoginScreenInstructor";
-import HomeScreenStudent from "./src/views/screens/HomeScreenStudent";
+import HomeScreenStudent from "./src/views/screensStudent/HomeScreenStudent";
+import QrScanner from "./src/views/screensStudent/qrscanner";
+import MailScreenStudent from "./src/views/screensStudent/MailScreenStudent";
 
 import { ScheduleProvider } from './src/views/context/ScheduleContext';
 
@@ -24,7 +26,7 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 
-function TabNavigator() {
+function InstructorTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -44,11 +46,6 @@ function TabNavigator() {
             </View>
           ),
         }}
-        listeners={({ navigation }) => ({
-          tabPress: () => {
-            navigation.setOptions({ title: 'Home' });
-          },
-        })}
       />
       <Tab.Screen 
         name="Unlock" 
@@ -62,11 +59,6 @@ function TabNavigator() {
             </View>
           ),
         }}
-        listeners={({ navigation }) => ({
-          tabPress: () => {
-            navigation.setOptions({ title: 'Unlock' });
-          },
-        })}
       />
       <Tab.Screen 
         name="Mail" 
@@ -79,11 +71,57 @@ function TabNavigator() {
             </View>
           ),
         }}
-        listeners={({ navigation }) => ({
-          tabPress: () => {
-            navigation.setOptions({ title: 'Mail' });
-          },
-        })}
+      />
+    </Tab.Navigator>
+  );
+}
+
+// Student's Tab Navigator
+function StudentTabNavigator() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        tabBarShowLabel: false,
+        tabBarStyle: styles.tabBarStyle,
+        headerShown: false,
+      }}
+    >
+      <Tab.Screen 
+        name="Home" 
+        component={HomeScreenStudent} 
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View style={styles.iconContainer}>
+              <Icon name="home" size={30} color={focused ? '#000' : '#666'} />
+              <Text style={focused ? styles.iconTextFocused : styles.iconText}>HOME</Text>
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Qrscanner" 
+        component={QrScanner} 
+        options={{
+          tabBarIcon: () => (
+            <View style={styles.iconContainer}>
+              <View style={styles.circleButton}>
+                <Icon name="unlock-alt" size={30} color="#ffffff" />
+              </View>
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Mail" 
+        component={MailScreenStudent} 
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View style={styles.iconContainer}>
+              <Icon name="envelope" size={30} color={focused ? '#000' : '#666'} />
+              <Text style={focused ? styles.iconTextFocused : styles.iconText}>MAIL</Text>
+            </View>
+          ),
+        }}
       />
     </Tab.Navigator>
   );
@@ -100,8 +138,8 @@ function CustomDrawerContent(props) {
         if (userData) {
           const parsedData = JSON.parse(userData);
           if (parsedData.loggedIn) {
-            setUserName(parsedData.fullname || 'User'); // Default to 'User' if fullname is not available
-            setUserEmail(parsedData.email || ''); // Default to empty string if email is not available
+            setUserName(parsedData.fullname || 'User');
+            setUserEmail(parsedData.email || '');
           }
         }
       } catch (error) {
@@ -141,7 +179,7 @@ function DrawerNavigator() {
     <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />}>
       <Drawer.Screen 
         name="HomeTabs" 
-        component={TabNavigator} 
+        component={InstructorTabNavigator} 
         options={{ 
           title: 'Home',
           drawerIcon: ({ color, size }) => (
@@ -193,15 +231,68 @@ function DrawerNavigator() {
   );
 }
 
+function DrawerNavigatorStudent() {
+  return (
+    <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />}>
+      <Drawer.Screen 
+        name="HomeTabs" 
+        component={StudentTabNavigator} 
+        options={{ 
+          title: 'Home',
+          drawerIcon: ({ color, size }) => (
+            <Icon name="home" color={color} size={size} />
+          ),
+        }} 
+      />
+      <Drawer.Screen 
+        name="Qrscanner" 
+        component={QrScanner} 
+        options={{ 
+          title: 'Scanner',
+          drawerIcon: ({ color, size }) => (
+            <Icon name="unlock-alt" color={color} size={size} />
+          ),
+        }}
+      />
+      <Drawer.Screen 
+        name="MailScreen" 
+        component={MailScreen} 
+        options={{ 
+          title: 'Mail',
+          drawerIcon: ({ color, size }) => (
+            <Icon name="envelope" color={color} size={size} />
+          ),
+        }}
+      />
+    
+      <Drawer.Screen 
+        name="ProfileScreen" 
+        component={ProfileScreen} 
+        options={{ 
+          title: 'Profile',
+          drawerIcon: ({ color, size }) => (
+            <Icon name="user" color={color} size={size} />
+          ),
+        }}
+      />
+    </Drawer.Navigator>
+  );
+}
+
 function App() {
   return (
     <ScheduleProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="HomeScreenStudent" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="MainLog" screenOptions={{ headerShown: false }}>
           <Stack.Screen
             name="DrawerNavigator"
             component={DrawerNavigator}
           />
+          <Stack.Screen
+            name="DrawerNavigatorStudent"
+            component={DrawerNavigatorStudent}
+          />
+          
           <Stack.Screen
             name="MainLog"
             component={MainLog}
@@ -232,11 +323,7 @@ function App() {
             component={LoginScreenInstructor}
             options={{ headerShown: false }}
           />
-          <Stack.Screen
-            name="HomeScreenStudent"
-            component={HomeScreenStudent}
-            options={{ headerShown: false }}
-          />
+          
           
         </Stack.Navigator>
       </NavigationContainer>
