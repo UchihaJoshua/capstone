@@ -7,7 +7,7 @@ const AddSchedule = () => {
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { addSchedule } = useContext(ScheduleContext);
+  
 
   useEffect(() => {
     axios.get('http://192.168.101.13:8000/api/subs')
