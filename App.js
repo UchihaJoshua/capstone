@@ -105,7 +105,7 @@ function StudentTabNavigator() {
           tabBarIcon: () => (
             <View style={styles.iconContainer}>
               <View style={styles.circleButton}>
-                <Icon name="unlock-alt" size={30} color="#ffffff" />
+                <Icon name="qrcode" size={40} color="#ffffff" />
               </View>
             </View>
           ),
@@ -283,7 +283,7 @@ function App() {
   return (
     
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="MainLog" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="DrawerNavigatorStudent" screenOptions={{ headerShown: false }}>
           <Stack.Screen
             name="DrawerNavigator"
             component={DrawerNavigator}

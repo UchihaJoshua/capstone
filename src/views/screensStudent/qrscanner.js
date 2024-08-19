@@ -1,45 +1,64 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { RNCamera } from 'react-native-camera';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Button, Alert } from 'react-native';
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const QrScanner = ({ navigation }) => {
-  const [isScanning, setIsScanning] = useState(true);
+const QrScanner = () => {
+  const [hasPermission, setHasPermission] = useState(null);
+  const [scanned, setScanned] = useState(false);
+  const [userName, setUserName] = useState(null);
 
-  const handleBarCodeScanned = ({ data }) => {
-    setIsScanning(false);
-    Alert.alert("QR Code Scanned", `Data: ${data}`, [
-      {
-        text: "OK",
-        onPress: () => setIsScanning(true),
-      },
-    ]);
+  useEffect(() => {
+    (async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+
+      // Retrieve the user's name from AsyncStorage
+      const user = await AsyncStorage.getItem('user');
+      if (user) {
+        const userData = JSON.parse(user);
+        setUserName(userData.name); // Assuming the user object has a 'name' property
+      }
+    })();
+  }, []);
+
+  const handleBarCodeScanned = async ({ type, data }) => {
+    setScanned(true);
+    Alert.alert('QR Code Scanned', `Scanned data: ${data}`);
+
+    try {
+      const response = await axios.post('http://192.168.101.13:8000/api/record-scan', {
+        qr: data,
+        scanned_by: userName, // Use the logged-in user's name
+      });
+
+      if (response.status === 201) {
+        Alert.alert('Success', 'Scan recorded successfully!');
+      } else {
+        Alert.alert('Error', 'Failed to record the scan');
+      }
+    } catch (error) {
+      console.error('Error recording scan:', error);
+      Alert.alert('Error', 'Failed to record the scan');
+    }
   };
+
+  if (hasPermission === null) {
+    return <Text>Requesting for camera permission...</Text>;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
 
   return (
     <View style={styles.container}>
-      {isScanning ? (
-        <RNCamera
-          style={styles.camera}
-          onBarCodeRead={handleBarCodeScanned}
-          captureAudio={false}
-          type={RNCamera.Constants.Type.back}
-        >
-          <View style={styles.cameraOverlay}>
-            <Text style={styles.scanText}>Scan QR Code</Text>
-          </View>
-        </RNCamera>
-      ) : (
-        <View style={styles.scannedContainer}>
-          <Text style={styles.scannedText}>QR Code Scanned!</Text>
-          <TouchableOpacity
-            style={styles.rescanButton}
-            onPress={() => setIsScanning(true)}
-          >
-            <Icon name="refresh" size={24} color="#fff" />
-            <Text style={styles.buttonText}>Rescan</Text>
-          </TouchableOpacity>
-        </View>
+      <BarCodeScanner
+        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+        style={StyleSheet.absoluteFillObject}
+      />
+      {scanned && (
+        <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />
       )}
     </View>
   );
@@ -49,46 +68,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#000',
-  },
-  camera: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-  cameraOverlay: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  scanText: {
-    fontSize: 20,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  scannedContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000',
-  },
-  scannedText: {
-    fontSize: 24,
-    color: '#fff',
-    marginBottom: 20,
-  },
-  rescanButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#007bff',
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: '#fff',
-    marginLeft: 10,
-    fontSize: 16,
   },
 });
 

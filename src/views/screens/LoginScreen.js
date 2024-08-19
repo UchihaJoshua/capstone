@@ -1,122 +1,64 @@
-import React from "react";
+import React, { useState } from "react";
 import {
-  StyleSheet,
-  SafeAreaView,
   View,
   Text,
+  TextInput,
+  StyleSheet,
+  SafeAreaView,
   ScrollView,
   Image,
 } from "react-native";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-import {
-  ALERT_TYPE,
-  Dialog,
-  AlertNotificationRoot,
-  Toast,
-} from "react-native-alert-notification";
-
-import Input from "../components/Input";
-import Button from "../components/Button";
-import Loader from "../components/Loader";
-import ccsLogo from "../../img/lck.png";
+import axios from "axios";
+import { ALERT_TYPE, Dialog, AlertNotificationRoot } from "react-native-alert-notification";
+import Input from "../components/Input"; // Assuming you already have an Input component for icons
+import Button from "../components/Button"; // Assuming you already have a Button component for styling
+import Loader from "../components/Loader"; // Loader for loading state
+import ccsLogo from "../../img/lck.png"; // Assuming this is the logo
 
 const LoginScreen = ({ navigation }) => {
-  const [inputs, setInputs] = React.useState({
-    email: "",
-    password: "",
-  });
-  const [errors, setErrors] = React.useState({});
-  const [loading, setLoading] = React.useState(false);
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const validate = async () => {
-    let isValid = true;
-
-    if (!inputs.email) {
-      handleError("Please Enter an Email Address", "email");
-      isValid = false;
-    } else if (!inputs.email.match(/\S+@\S+\.\S+/)) {
-      handleError("Please Enter a Valid Email Address", "email");
-      isValid = false;
-    }
-
-    if (!inputs.password) {
-      handleError("Please Enter a Password", "password");
-      isValid = false;
-    } else if (inputs.password.length < 8) {
-      handleError("Minimum Password Length is 8", "password");
-      isValid = false;
-    }
-
-    if (isValid) login();
-  };
-
-  const handleOnChange = (text, input) => {
-    setInputs((prevState) => ({ ...prevState, [input]: text }));
-  };
-
-  const handleError = (text, input) => {
-    setErrors((prevState) => ({ ...prevState, [input]: text }));
-  };
-
-  const login = async () => {
-    console.log("login!");
-    console.log(inputs);
-
+  const handleLogin = async () => {
     setLoading(true);
-
     try {
-      // Retrieve user data from AsyncStorage
-      let userData = await AsyncStorage.getItem("userData");
-      console.log("Retrieved User Data:", userData);
+      const response = await axios.post("http://192.168.101.13:8000/api/student", {
+        name,
+        password,
+      });
 
-      if (userData) {
-        userData = JSON.parse(userData);
-        console.log("Parsed User Data:", userData);
-
-        // Validate login credentials
-        if (
-          inputs.email === userData.email &&
-          inputs.password === userData.password
-        ) {
-          // Successful login
-          await AsyncStorage.setItem(
-            "userData",
-            JSON.stringify({ ...userData, loggedIn: true })
-          );
-          navigation.navigate("DrawerNavigatorStudent", {
-            screen: "HomeTabs",
-            params: { screen: "Home" },
-          });
-        } else {
-          // Incorrect credentials
-          Dialog.show({
-            type: ALERT_TYPE.DANGER,
-            title: "ERROR",
-            textBody: "Incorrect Username/Password!",
-            button: "Close",
-          });
-        }
-      } else {
-        // No user data found
+      if (response.status === 200) {
+        // Store user data in AsyncStorage
+        await AsyncStorage.setItem("user", JSON.stringify(response.data));
+        // Navigate to QrScanner screen
+        navigation.navigate("DrawerNavigatorStudent", { user: response.data });
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 422) {
+        const validationErrors = error.response.data.errors;
+        const errorMessage = Object.values(validationErrors).flat().join("\n");
+        setError(errorMessage);
         Dialog.show({
           type: ALERT_TYPE.DANGER,
-          title: "ERROR",
-          textBody: "No Account Found!",
+          title: "Validation Error",
+          textBody: errorMessage,
+          button: "Close",
+        });
+      } else {
+        setError("Failed to connect to the server");
+        Dialog.show({
+          type: ALERT_TYPE.DANGER,
+          title: "Error",
+          textBody: "Failed to connect to the server",
           button: "Close",
         });
       }
-    } catch (error) {
-      // Error handling
-      Dialog.show({
-        type: ALERT_TYPE.DANGER,
-        title: "ERROR",
-        textBody: error.message || error,
-        button: "Close",
-      });
+      console.error("Network request failed:", error);
     } finally {
-      setLoading(false); // Ensure loading is stopped
+      setLoading(false);
     }
   };
 
@@ -130,29 +72,24 @@ const LoginScreen = ({ navigation }) => {
           <Text style={styles.textTitle}>LOGIN AS STUDENT</Text>
           <View style={styles.viewContainer}>
             <Input
-              label="Email Address"
-              iconName="envelope"
-              placeholder="Enter your Email Address"
-              onChangeText={(text) => handleOnChange(text, "email")}
-              onFocus={() => handleError(null, "email")}
-              error={errors.email}
+              label="Username"
+              iconName="user" // Assuming your Input component handles icons
+              placeholder="Enter your Username"
+              onChangeText={setName}
+              onFocus={() => setError(null)}
+              error={error} // Show any validation errors
             />
             <Input
               label="Password"
-              iconName="key"
+              iconName="lock" // Assuming your Input component handles icons
               password
               placeholder="Enter your Password"
-              onChangeText={(text) => handleOnChange(text, "password")}
-              onFocus={() => handleError(null, "password")}
-              error={errors.password}
+              onChangeText={setPassword}
+              onFocus={() => setError(null)}
+              error={error} // Show any validation errors
             />
-            <Button title="Login" onPress={validate} />
-            <Text
-              style={styles.textRegister}
-              onPress={() => navigation.navigate("RegistrationScreen")}
-            >
-              Don't have an account? Sign Up
-            </Text>
+            <Button title="Login" onPress={handleLogin} />
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -170,7 +107,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   spacer: {
-    height: 50, // Adjust the height to move the image down
+    height: 50,
   },
   image: {
     width: 255,
@@ -187,11 +124,10 @@ const styles = StyleSheet.create({
   viewContainer: {
     paddingVertical: 20,
   },
-  textRegister: {
+  errorText: {
+    color: "red",
     textAlign: "center",
-    fontSize: 16,
-    color: "white",
-    fontWeight: "bold",
+    marginTop: 10,
   },
 });
 
