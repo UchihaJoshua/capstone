@@ -1,30 +1,61 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, Button, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Alert, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import axios from 'axios';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AddSchedule = () => {
   const [subjects, setSubjects] = useState([]);
+  const [linkedSubjects, setLinkedSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    axios.get('http://192.168.101.13:8000/api/subs')
-      .then(response => {
-        if (response.data && Array.isArray(response.data.data)) {
-          setSubjects(response.data.data);
+    const fetchUserData = async () => {
+      try {
+        const userDataString = await AsyncStorage.getItem('userData');
+        const userData = userDataString ? JSON.parse(userDataString) : null;
+        if (userData && userData.id) {
+          setUserId(userData.id); // Store user_id for POST
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    };
+
+    fetchUserData();
+
+    // Fetch subjects and linked subjects
+    const fetchSubjectsAndLinkedSubjects = async () => {
+      try {
+        const [subjectsResponse, linkedSubjectsResponse] = await Promise.all([
+          axios.get('http://192.168.101.13:8000/api/subs'),
+          axios.get('http://192.168.101.13:8000/api/linkedSubjects'),
+        ]);
+
+        if (subjectsResponse.data && Array.isArray(subjectsResponse.data.data)) {
+          setSubjects(subjectsResponse.data.data);
         } else {
-          console.error('Unexpected data format:', response.data);
+          console.error('Unexpected data format for subjects:', subjectsResponse.data);
           Alert.alert('Error', 'Failed to load subjects.');
         }
+
+        if (linkedSubjectsResponse.data && Array.isArray(linkedSubjectsResponse.data.data)) {
+          setLinkedSubjects(linkedSubjectsResponse.data.data.map(item => item.subject_id));
+        } else {
+          console.error('Unexpected data format for linked subjects:', linkedSubjectsResponse.data);
+          Alert.alert('Error', 'Failed to load linked subjects.');
+        }
+
         setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching subjects:', error);
-        Alert.alert('Error', 'Failed to load subjects.');
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        Alert.alert('Error', 'Failed to load subjects and linked subjects.');
         setLoading(false);
-      });
+      }
+    };
+
+    fetchSubjectsAndLinkedSubjects();
   }, []);
 
   const formatTime = (time) => {
@@ -35,22 +66,40 @@ const AddSchedule = () => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
   };
 
-  const handleAddSchedule = () => {
+  const handleAddSchedule = async () => {
     if (!selectedSubject) {
       Alert.alert('Validation Error', 'Please select a subject.');
       return;
     }
 
-    const schedule = {
-      subject: selectedSubject.name,
-      subjectCode: selectedSubject.code,
-      section: selectedSubject.section,
-      description: selectedSubject.description,
-      startTime: selectedSubject.start_time,
-      endTime: selectedSubject.end_time,
-    };
-    addSchedule(schedule);
-    Alert.alert('Success', 'Schedule added successfully!');
+    try {
+      // Create the data object to be posted
+      const scheduleData = {
+        data: [
+          {
+            id: null, // Assuming the ID will be generated server-side
+            user_id: userId, // User ID from AsyncStorage
+            subject_id: selectedSubject.id, // Selected subject ID
+          }
+        ]
+      };
+
+      console.log('Submitting schedule data:', scheduleData);
+
+      // Post the schedule data to the API
+      const response = await axios.post('http://192.168.101.13:8000/api/linkedSubjects', scheduleData);
+
+      if (response.data) {
+        console.log('Schedule added successfully:', response.data);
+        Alert.alert('Success', 'Schedule added successfully!');
+      } else {
+        console.log('Unexpected response data:', response.data);
+        Alert.alert('Error', 'Failed to add schedule.');
+      }
+    } catch (error) {
+      console.error('Failed to add schedule:', error);
+      Alert.alert('Error', 'Failed to add schedule.');
+    }
   };
 
   const renderSubjectRow = (subject) => (
@@ -70,6 +119,8 @@ const AddSchedule = () => {
     </TouchableOpacity>
   );
 
+  const filteredSubjects = subjects.filter(subject => !linkedSubjects.includes(subject.id));
+
   if (loading) {
     return <ActivityIndicator size="large" color="#007BFF" style={styles.loader} />;
   }
@@ -86,11 +137,10 @@ const AddSchedule = () => {
             <Text style={[styles.tableHeaderCell, styles.timeCell]}>End Time</Text>
             <Text style={[styles.tableHeaderCell, styles.sectionCell]}>Section</Text>
           </View>
-          {subjects.map(renderSubjectRow)}
+          {filteredSubjects.map(renderSubjectRow)}
         </View>
       </ScrollView>
 
-      {/* Display detailed information of the selected subject */}
       {selectedSubject && (
         <View style={styles.detailContainer}>
           <Text style={styles.detailTitle}>{selectedSubject.name}</Text>

@@ -274,7 +274,7 @@ function App() {
   return (
     
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="DrawerNavigatorStudent" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="MainLog" screenOptions={{ headerShown: false }}>
           <Stack.Screen
             name="DrawerNavigator"
             component={DrawerNavigator}
