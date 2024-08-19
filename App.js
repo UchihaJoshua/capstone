@@ -187,16 +187,7 @@ function DrawerNavigator() {
           ),
         }} 
       />
-      <Drawer.Screen 
-        name="UnlockScreen" 
-        component={UnlockScreen} 
-        options={{ 
-          title: 'Unlock',
-          drawerIcon: ({ color, size }) => (
-            <Icon name="unlock-alt" color={color} size={size} />
-          ),
-        }}
-      />
+      
       <Drawer.Screen 
         name="MailScreen" 
         component={MailScreen} 
