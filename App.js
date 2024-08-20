@@ -9,7 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import HomeScreen from "./src/views/screens/HomeScreen";
 import RegistrationScreen from "./src/views/screens/RegistrationScreen";
-import LoginScreen from "./src/views/screens/LoginScreen";
+import LoginScreen from "./src/views/screensStudent/LoginScreen";
 import MainLog from "./src/views/screens/MainLog";
 import UnlockScreen from "./src/views/screens/UnlockScreen";
 import MailScreen from "./src/views/screens/MailScreen";

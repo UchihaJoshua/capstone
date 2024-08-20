@@ -33,18 +33,18 @@ const HomeScreen = ({ navigation }) => {
 
   const fetchData = async () => {
     try {
-      const subjectsResponse = await axios.get('http://192.168.101.13:8000/api/subs');
+      const subjectsResponse = await axios.get('http://172.18.97.29:8000/api/subs');
       const fetchedSubjects = subjectsResponse.data.data;
       setSubjects(fetchedSubjects);
 
-      const subjectIdResponse = await axios.get('http://192.168.101.13:8000/api/linkedSubjects');
+      const subjectIdResponse = await axios.get('http://172.18.97.29:8000/api/linkedSubjects');
       const subjectIds = subjectIdResponse.data.data.map(item => item.subject_id);
 
-      const instructorsResponse = await axios.get('http://192.168.101.13:8000/api/instructors');
+      const instructorsResponse = await axios.get('http://172.18.97.29:8000/api/instructors');
       const fetchedInstructors = instructorsResponse.data.data;
       setInstructors(fetchedInstructors);
 
-      const instructorSubjectResponse = await axios.get('http://192.168.101.13:8000/api/linkedSubjects');
+      const instructorSubjectResponse = await axios.get('http://172.18.97.29:8000/api/linkedSubjects');
       const instructorSubjects = instructorSubjectResponse.data.data;
 
       const subjectInstructorMap = {};
@@ -109,6 +109,7 @@ const HomeScreen = ({ navigation }) => {
               <View style={styles.box}>
                 <Text style={styles.boxText}>Centered Box</Text>
               </View>
+              <Text style={styles.scheduleText}>MACLAB SCHEDULE</Text>
               {groupedSubjects.map(group => (
                 <View key={group.instructorName} style={styles.group}>
                   <Text style={styles.instructorHeader}>{group.instructorName}</Text>
@@ -253,9 +254,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   box: {
-    backgroundColor: '#fff',
+    backgroundColor: '#e0e0e0',
     borderRadius: 10,
-    padding: 20,
+    padding: 50,
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -326,6 +327,14 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 18,
   },
+  scheduleText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginVertical: 15,
+  },
+  
 });
 
 export default HomeScreen;

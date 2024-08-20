@@ -29,8 +29,8 @@ const AddSchedule = () => {
     const fetchSubjectsAndLinkedSubjects = async () => {
       try {
         const [subjectsResponse, linkedSubjectsResponse] = await Promise.all([
-          axios.get('http://192.168.101.13:8000/api/subs'),
-          axios.get('http://192.168.101.13:8000/api/linkedSubjects'),
+          axios.get('http://172.18.97.29:8000/api/subs'),
+          axios.get('http://172.18.97.29:8000/api/linkedSubjects'),
         ]);
 
         if (subjectsResponse.data && Array.isArray(subjectsResponse.data.data)) {
@@ -87,7 +87,7 @@ const AddSchedule = () => {
       console.log('Submitting schedule data:', scheduleData);
 
       // Post the schedule data to the API
-      const response = await axios.post('http://192.168.101.13:8000/api/linkedSubjects', scheduleData);
+      const response = await axios.post('http://172.18.97.29:8000/api/linkedSubjects', scheduleData);
 
       if (response.data) {
         console.log('Schedule added successfully:', response.data);
