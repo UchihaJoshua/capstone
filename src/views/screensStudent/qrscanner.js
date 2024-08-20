@@ -28,7 +28,7 @@ const QrScanner = () => {
     Alert.alert('QR Code Scanned', `Scanned data: ${data}`);
 
     try {
-      const response = await axios.post('http://172.18.97.29:8000/api/record-scan', {
+      const response = await axios.post('http://10.0.0.53:8000/api/record-scan', {
         qr: data,
         scanned_by: userName, // Use the logged-in user's name
       });

@@ -25,7 +25,7 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://172.18.97.29:8000/api/student", {
+      const response = await axios.post("http://10.0.0.53:8000/api/student", {
         name,
         password,
       });

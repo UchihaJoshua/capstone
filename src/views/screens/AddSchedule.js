@@ -25,38 +25,37 @@ const AddSchedule = () => {
 
     fetchUserData();
 
-    // Fetch subjects and linked subjects
-    const fetchSubjectsAndLinkedSubjects = async () => {
-      try {
-        const [subjectsResponse, linkedSubjectsResponse] = await Promise.all([
-          axios.get('http://172.18.97.29:8000/api/subs'),
-          axios.get('http://172.18.97.29:8000/api/linkedSubjects'),
-        ]);
-
-        if (subjectsResponse.data && Array.isArray(subjectsResponse.data.data)) {
-          setSubjects(subjectsResponse.data.data);
-        } else {
-          console.error('Unexpected data format for subjects:', subjectsResponse.data);
-          Alert.alert('Error', 'Failed to load subjects.');
-        }
-
-        if (linkedSubjectsResponse.data && Array.isArray(linkedSubjectsResponse.data.data)) {
-          setLinkedSubjects(linkedSubjectsResponse.data.data.map(item => item.subject_id));
-        } else {
-          console.error('Unexpected data format for linked subjects:', linkedSubjectsResponse.data);
-          Alert.alert('Error', 'Failed to load linked subjects.');
-        }
-
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        Alert.alert('Error', 'Failed to load subjects and linked subjects.');
-        setLoading(false);
-      }
-    };
-
     fetchSubjectsAndLinkedSubjects();
   }, []);
+
+  const fetchSubjectsAndLinkedSubjects = async () => {
+    try {
+      const [subjectsResponse, linkedSubjectsResponse] = await Promise.all([
+        axios.get('http://10.0.0.53:8000/api/subs'),
+        axios.get('http://10.0.0.53:8000/api/linkedSubjects'),
+      ]);
+
+      if (subjectsResponse.data && Array.isArray(subjectsResponse.data.data)) {
+        setSubjects(subjectsResponse.data.data);
+      } else {
+        console.error('Unexpected data format for subjects:', subjectsResponse.data);
+        Alert.alert('Error', 'Failed to load subjects.');
+      }
+
+      if (linkedSubjectsResponse.data && Array.isArray(linkedSubjectsResponse.data.data)) {
+        setLinkedSubjects(linkedSubjectsResponse.data.data.map(item => item.subject_id));
+      } else {
+        console.error('Unexpected data format for linked subjects:', linkedSubjectsResponse.data);
+        Alert.alert('Error', 'Failed to load linked subjects.');
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      Alert.alert('Error', 'Failed to load subjects and linked subjects.');
+      setLoading(false);
+    }
+  };
 
   const formatTime = (time) => {
     const [hour, minute] = time.split(':');
@@ -75,29 +74,30 @@ const AddSchedule = () => {
     try {
       // Create the data object to be posted
       const scheduleData = {
-        data: [
-          {
-            id: null, // Assuming the ID will be generated server-side
-            user_id: userId, // User ID from AsyncStorage
-            subject_id: selectedSubject.id, // Selected subject ID
-          }
-        ]
+        user_id: userId, // User ID from AsyncStorage
+        subject_id: selectedSubject.id, // Selected subject ID
       };
 
       console.log('Submitting schedule data:', scheduleData);
 
       // Post the schedule data to the API
-      const response = await axios.post('http://172.18.97.29:8000/api/linkedSubjects', scheduleData);
+      const response = await axios.post('http://10.0.0.53:8000/api/linkedSubjects', scheduleData);
 
       if (response.data) {
         console.log('Schedule added successfully:', response.data);
         Alert.alert('Success', 'Schedule added successfully!');
+
+        // Refetch the data to update the list
+        fetchSubjectsAndLinkedSubjects();
       } else {
         console.log('Unexpected response data:', response.data);
         Alert.alert('Error', 'Failed to add schedule.');
       }
     } catch (error) {
       console.error('Failed to add schedule:', error);
+      console.error('Error response data:', error.response?.data);
+      console.error('Error response status:', error.response?.status);
+      console.error('Error response headers:', error.response?.headers);
       Alert.alert('Error', 'Failed to add schedule.');
     }
   };

@@ -46,7 +46,7 @@ const LoginScreenInstructor = ({ navigation }) => {
   const login = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://172.18.97.29:8000/api/verify-pin", {
+      const response = await axios.post("http://10.0.0.53:8000/api/verify-pin", {
         pin: pin,
       });
 
