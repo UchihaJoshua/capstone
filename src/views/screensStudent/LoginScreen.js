@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   SafeAreaView,
   ScrollView,
@@ -11,10 +10,10 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { ALERT_TYPE, Dialog, AlertNotificationRoot } from "react-native-alert-notification";
-import Input from "../components/Input"; // Assuming you already have an Input component for icons
-import Button from "../components/Button"; // Assuming you already have a Button component for styling
-import Loader from "../components/Loader"; // Loader for loading state
-import ccsLogo from "../../img/lck.png"; // Assuming this is the logo
+import Input from "../components/Input";
+import Button from "../components/Button";
+import Loader from "../components/Loader";
+import ccsLogo from "../../img/lck.png";
 
 const LoginScreen = ({ navigation }) => {
   const [name, setName] = useState("");
@@ -25,16 +24,20 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://10.0.0.53:8000/api/student", {
+      const response = await axios.post("http://192.168.1.19:8000/api/student", {
         name,
         password,
       });
 
       if (response.status === 200) {
-        // Store user data in AsyncStorage
-        await AsyncStorage.setItem("user", JSON.stringify(response.data));
-        // Navigate to QrScanner screen
-        navigation.navigate("DrawerNavigatorStudent", { user: response.data });
+        const userData = response.data;
+        const userId = userData.id; // Extract the user's ID
+
+        // Store user data in AsyncStorage, including the ID
+        await AsyncStorage.setItem("user", JSON.stringify(userData));
+
+        // Pass the user ID to the DrawerNavigatorStudent and navigate
+        navigation.navigate("DrawerNavigatorStudent", { userId });
       }
     } catch (error) {
       if (error.response && error.response.status === 422) {
@@ -73,20 +76,20 @@ const LoginScreen = ({ navigation }) => {
           <View style={styles.viewContainer}>
             <Input
               label="Username"
-              iconName="user" // Assuming your Input component handles icons
+              iconName="user"
               placeholder="Enter your Username"
               onChangeText={setName}
               onFocus={() => setError(null)}
-              error={error} // Show any validation errors
+              error={error}
             />
             <Input
               label="Password"
-              iconName="lock" // Assuming your Input component handles icons
+              iconName="lock"
               password
               placeholder="Enter your Password"
               onChangeText={setPassword}
               onFocus={() => setError(null)}
-              error={error} // Show any validation errors
+              error={error}
             />
             <Button title="Login" onPress={handleLogin} />
             {error ? <Text style={styles.errorText}>{error}</Text> : null}

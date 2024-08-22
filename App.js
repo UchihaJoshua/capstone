@@ -19,6 +19,7 @@ import LoginScreenInstructor from "./src/views/screens/LoginScreenInstructor";
 import HomeScreenStudent from "./src/views/screensStudent/HomeScreenStudent";
 import QrScanner from "./src/views/screensStudent/qrscanner";
 import MailScreenStudent from "./src/views/screensStudent/MailScreenStudent";
+import Biometrics from "./src/views/screensStudent/Biometrics";
 
 
 
@@ -266,6 +267,17 @@ function DrawerNavigatorStudent() {
           ),
         }}
       />
+
+<Drawer.Screen 
+        name="Biometrics" 
+        component={Biometrics} 
+        options={{ 
+          title: 'Profile',
+          drawerIcon: ({ color, size }) => (
+            <Icon name="user" color={color} size={size} />
+          ),
+        }}
+      />
     </Drawer.Navigator>
   );
 }
@@ -312,6 +324,11 @@ function App() {
           <Stack.Screen
             name="LoginScreenInstructor"
             component={LoginScreenInstructor}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Biometrics"
+            component={Biometrics}
             options={{ headerShown: false }}
           />
           

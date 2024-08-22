@@ -33,18 +33,18 @@ const HomeScreen = ({ navigation }) => {
 
   const fetchData = async () => {
     try {
-      const subjectsResponse = await axios.get('http://10.0.0.53:8000/api/subs');
+      const subjectsResponse = await axios.get('http://192.168.1.19:8000/api/subs');
       const fetchedSubjects = subjectsResponse.data.data;
       setSubjects(fetchedSubjects);
 
-      const subjectIdResponse = await axios.get('http://10.0.0.53:8000/api/linkedSubjects');
+      const subjectIdResponse = await axios.get('http://192.168.1.19:8000/api/linkedSubjects');
       const subjectIds = subjectIdResponse.data.data.map(item => item.subject_id);
 
-      const instructorsResponse = await axios.get('http://10.0.0.53:8000/api/instructors');
+      const instructorsResponse = await axios.get('http://192.168.1.19:8000/api/instructors');
       const fetchedInstructors = instructorsResponse.data.data;
       setInstructors(fetchedInstructors);
 
-      const instructorSubjectResponse = await axios.get('http://10.0.0.53:8000/api/linkedSubjects');
+      const instructorSubjectResponse = await axios.get('http://192.168.1.19:8000/api/linkedSubjects');
       const instructorSubjects = instructorSubjectResponse.data.data;
 
       const subjectInstructorMap = {};
