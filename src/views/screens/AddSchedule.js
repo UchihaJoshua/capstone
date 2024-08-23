@@ -31,8 +31,8 @@ const AddSchedule = () => {
   const fetchSubjectsAndLinkedSubjects = async () => {
     try {
       const [subjectsResponse, linkedSubjectsResponse] = await Promise.all([
-        axios.get('http://192.168.1.19:8000/api/subs'),
-        axios.get('http://192.168.1.19:8000/api/linkedSubjects'),
+        axios.get('https://lockup.pro/api/subs'),
+        axios.get('https://lockup.pro/api/linkedSubjects'),
       ]);
 
       if (subjectsResponse.data && Array.isArray(subjectsResponse.data.data)) {
@@ -81,7 +81,7 @@ const AddSchedule = () => {
       console.log('Submitting schedule data:', scheduleData);
 
       // Post the schedule data to the API
-      const response = await axios.post('http://192.168.1.19:8000/api/linkedSubjects', scheduleData);
+      const response = await axios.post('https://lockup.pro/api/linkedSubjects', scheduleData);
 
       if (response.data) {
         console.log('Schedule added successfully:', response.data);

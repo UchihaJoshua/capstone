@@ -20,6 +20,7 @@ import HomeScreenStudent from "./src/views/screensStudent/HomeScreenStudent";
 import QrScanner from "./src/views/screensStudent/qrscanner";
 import MailScreenStudent from "./src/views/screensStudent/MailScreenStudent";
 import Biometrics from "./src/views/screensStudent/Biometrics";
+import VerifyBiometrics from "./src/views/screensStudent/VerifyBiometrics";
 
 
 
@@ -329,6 +330,12 @@ function App() {
           <Stack.Screen
             name="Biometrics"
             component={Biometrics}
+            options={{ headerShown: false }}
+          />
+
+<Stack.Screen
+            name="VerifyBiometrics"
+            component={VerifyBiometrics}
             options={{ headerShown: false }}
           />
           

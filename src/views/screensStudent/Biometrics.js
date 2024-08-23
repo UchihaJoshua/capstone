@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, Alert } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 const Biometrics = () => {
   const [biometricRegistered, setBiometricRegistered] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     checkBiometricAvailability();
+    retrieveUserId(); // Retrieve the user ID when the component mounts
   }, []);
 
   const checkBiometricAvailability = async () => {
@@ -21,6 +24,16 @@ const Biometrics = () => {
     }
   };
 
+  const retrieveUserId = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('user');
+      const parsedUserData = JSON.parse(userData);
+      setUserId(parsedUserData.id); // Store the user ID
+    } catch (error) {
+      console.error('Failed to retrieve user ID:', error);
+    }
+  };
+
   const handleRegisterBiometrics = async () => {
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage: 'Register your biometrics',
@@ -29,7 +42,7 @@ const Biometrics = () => {
 
     if (result.success) {
       setBiometricRegistered(true);
-      const uid = generateUID(); // Generate a unique identifier
+      const uid = generateUID();
       sendBiometricDataToBackend(uid);
     } else {
       Alert.alert('Authentication failed', result.error);
@@ -37,15 +50,14 @@ const Biometrics = () => {
   };
 
   const generateUID = () => {
-    // Generate a unique identifier for the biometric registration
     return 'user-' + new Date().getTime();
   };
 
   const sendBiometricDataToBackend = async (uid) => {
     try {
       const response = await axios.post('http://192.168.1.19:8000/api/register-biometrics', {
-        user_id: 1, // Replace with actual user ID or data
-        biometric_data: uid, // Send the UID instead of raw biometric data
+        user_id: userId, // Use the retrieved user ID here
+        biometric_data: uid,
       });
 
       if (response.status === 200) {

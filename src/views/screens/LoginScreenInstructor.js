@@ -46,9 +46,15 @@ const LoginScreenInstructor = ({ navigation }) => {
   const login = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://192.168.1.19:8000/api/verify-pin", {
-        pin: pin,
-      });
+      const response = await axios.post(
+        "https://lockup.pro/api/verify-pin",
+        { pin: pin },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       // Log the API response data
       console.log('API Response:', response.data);
@@ -73,8 +79,14 @@ const LoginScreenInstructor = ({ navigation }) => {
         });
       }
     } catch (error) {
-      // Log the error
-      console.log('Login error:', error);
+      // Log the full error response for better debugging
+      if (error.response) {
+        console.log('Login error:', error.response);
+        console.log('Status:', error.response.status);
+        console.log('Data:', error.response.data);
+      } else {
+        console.log('Login error:', error.message);
+      }
 
       Dialog.show({
         type: ALERT_TYPE.DANGER,
