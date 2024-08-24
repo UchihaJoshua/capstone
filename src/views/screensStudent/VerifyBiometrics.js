@@ -27,7 +27,7 @@ const VerifyBiometrics = () => {
 
         if (result.success) {
           // Fetch user data from the backend using the provided user ID
-          const userResponse = await axios.get(`http://192.168.1.19:8000/api/students/${userId}`);
+          const userResponse = await axios.get `https://lockup.pro/api/students`;
           const userData = userResponse.data;
 
           if (userData.biometric_data) {
@@ -38,7 +38,7 @@ const VerifyBiometrics = () => {
             }
           } else {
             // If biometric data is null, register the new biometric data
-            const updateResponse = await axios.put(`http://192.168.1.19:8000/api/students/${userId}`, {
+            const updateResponse = await axios.put(`https://lockup.pro/api/students/${userId}`, {
               biometric_data: result.id,
             });
 

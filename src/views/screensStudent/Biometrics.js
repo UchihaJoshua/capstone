@@ -55,7 +55,7 @@ const Biometrics = () => {
 
   const sendBiometricDataToBackend = async (uid) => {
     try {
-      const response = await axios.post('http://192.168.1.19:8000/api/register-biometrics', {
+      const response = await axios.post('https://lockup.pro/api/register-biometrics', {
         user_id: userId, // Use the retrieved user ID here
         biometric_data: uid,
       });
